@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ringdo — Todos that ring</title>
+<meta name="theme-color" content="#14110f">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14110f; --surface:#1d1916; --surface-2:#26211d; --line:#3a332d;
+  --text:#f4ece4; --muted:#a79a8d; --faint:#6f655b;
+  --accent:#ff6a3d; --accent-ink:#1a0d07; --ok:#7bd88f; --warn:#ffc857;
+  --r:14px; --sans:'Satoshi',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:20px 18px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;letter-spacing:-.02em}
+.brand svg{width:30px;height:30px;color:var(--accent)}
+.clock{font-family:var(--mono);font-size:15px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.arm{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.arm h2{font-size:15px;font-weight:700}
+.arm p{color:var(--muted);font-size:13.5px;line-height:1.45;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{font-size:12px;padding:5px 9px;border-radius:99px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line);display:inline-flex;align-items:center;gap:6px}
+.chip i{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.chip.on{color:var(--text)} .chip.on i{background:var(--ok);box-shadow:0 0 8px var(--ok)}
+.chip.bad i{background:var(--warn)}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{padding:11px 16px;border-radius:11px;font-weight:700;font-size:14.5px;background:var(--surface-2);border:1px solid var(--line);transition:transform .1s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.ghost{background:transparent}
+.arm.armed{border-color:#2f4a35}
+
+form.add{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+label{font-size:12px;color:var(--muted);font-weight:500;display:block;margin-bottom:6px;letter-spacing:.02em}
+.field{margin-top:12px}
+.field:first-child{margin-top:0}
+input[type=text],input[type=date],input[type=time],select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font-size:16px;color-scheme:dark}
+input[type=text]::placeholder{color:var(--faint)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.quick button{font-size:12.5px;padding:6px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+.quick button:active{background:var(--surface-2);color:var(--text)}
+form .btn.primary{width:100%;margin-top:14px;padding:14px;font-size:15.5px}
+
+.sec{margin-top:28px;display:flex;justify-content:space-between;align-items:baseline}
+.sec h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.sec span{font-size:12px;color:var(--faint)}
+ul{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:8px}
+li.todo{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 12px 12px 14px}
+li.todo.overdue{border-color:#5a2e20}
+li.todo.done{opacity:.5}
+li.todo.done .t{text-decoration:line-through}
+.check{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center}
+.done .check{background:var(--ok);border-color:var(--ok)}
+.check svg{width:14px;height:14px;opacity:0}
+.done .check svg{opacity:1}
+.t{font-weight:700;font-size:15.5px;line-height:1.3;word-break:break-word}
+.meta{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap}
+.meta .cd{color:var(--accent)}
+.overdue .meta .cd{color:var(--warn)}
+.del{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--faint)}
+.del:active{background:var(--surface-2)}
+.empty{text-align:center;color:var(--faint);padding:28px 10px;border:1px dashed var(--line);border-radius:var(--r);font-size:14px;margin-top:10px}
+.note{margin-top:30px;font-size:12.5px;color:var(--faint);line-height:1.55}
+.note b{color:var(--muted)}
+
+/* Ringing overlay */
+.ring{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;justify-content:space-between;padding:calc(env(safe-area-inset-top) + 40px) 24px calc(env(safe-area-inset-bottom) + 28px);background:radial-gradient(120% 80% at 50% 30%,#4a1a0c 0%,#14110f 70%);text-align:center}
+.ring.show{display:flex}
+.ring .pulse{width:140px;height:140px;margin:0 auto;border-radius:50%;background:var(--accent);display:grid;place-items:center;animation:pulse 1s ease-in-out infinite;box-shadow:0 0 0 0 rgba(255,106,61,.6)}
+.ring .pulse svg{width:70px;height:70px;color:var(--accent-ink);animation:shake .25s linear infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,106,61,.55)}70%{box-shadow:0 0 0 40px rgba(255,106,61,0)}100%{box-shadow:0 0 0 0 rgba(255,106,61,0)}}
+@keyframes shake{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
+.ring .bigtime{font-family:var(--mono);font-size:64px;font-weight:700;letter-spacing:-.03em;margin-top:28px;font-variant-numeric:tabular-nums}
+.ring .what{font-size:24px;font-weight:900;margin-top:10px;line-height:1.25;word-break:break-word}
+.ring .sub{color:var(--muted);margin-top:6px;font-size:14px}
+.ring .acts{display:flex;flex-direction:column;gap:10px}
+.ring .acts .btn{padding:18px;font-size:17px;border-radius:16px}
+.ring .snz{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media (prefers-reduced-motion:reduce){.ring .pulse,.ring .pulse svg{animation:none}}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 20px);transform:translateX(-50%) translateY(120px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:700;font-size:14px;transition:transform .3s;z-index:60;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 32 32" fill="none" aria-label="Ringdo logo"><circle cx="16" cy="18" r="9" stroke="currentColor" stroke-width="2.6"/><path d="M12.4 18l2.6 2.6 4.6-5" stroke="#f4ece4" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 8l4-3M27 8l-4-3" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      Ringdo
+    </div>
+    <div class="clock" id="clock">--:--:--</div>
+  </header>
+
+  <section class="arm" id="armBox">
+    <h2 id="armTitle">Arm the alarm</h2>
+    <p id="armText">Phones block loud sound until you tap once. Arm Ringdo to unlock the alarm sound, vibration, screen wake and backup notifications.</p>
+    <div class="chips">
+      <span class="chip" id="cSound"><i></i>Sound</span>
+      <span class="chip" id="cVib"><i></i>Vibration</span>
+      <span class="chip" id="cNotif"><i></i>Notifications</span>
+      <span class="chip" id="cWake"><i></i>Screen awake</span>
+    </div>
+    <div class="row">
+      <button class="btn primary" id="armBtn">Arm alarms</button>
+      <button class="btn ghost" id="testBtn">Test ring</button>
+    </div>
+  </section>
+
+  <form class="add" id="addForm" autocomplete="off">
+    <div class="field">
+      <label for="title">Task</label>
+      <input type="text" id="title" placeholder="Call the bank, take medicine…" required maxlength="140">
+    </div>
+    <div class="field two">
+      <div><label for="date">Date</label><input type="date" id="date" required></div>
+      <div><label for="time">Ring at</label><input type="time" id="time" required></div>
+    </div>
+    <div class="quick" id="quick">
+      <button type="button" data-q="1m">+1 min</button>
+      <button type="button" data-q="15m">+15 min</button>
+      <button type="button" data-q="1h">+1 hour</button>
+      <button type="button" data-q="tonight">Tonight 9 PM</button>
+      <button type="button" data-q="tmr">Tomorrow 7 AM</button>
+    </div>
+    <div class="field two">
+      <div><label for="sound">Alarm sound</label>
+        <select id="sound"><option value="classic">Classic beep</option><option value="siren">Siren</option><option value="chime">Rising chime</option></select></div>
+      <div><label for="repeat">Repeat</label>
+        <select id="repeat"><option value="none">Once</option><option value="daily">Every day</option><option value="weekdays">Weekdays</option></select></div>
+    </div>
+    <button class="btn primary" type="submit">Add todo with alarm</button>
+  </form>
+
+  <div class="sec"><h3>Upcoming</h3><span id="upCount"></span></div>
+  <ul id="upList"></ul>
+  <div class="sec" id="doneSec"><h3>Done</h3><span id="doneCount"></span></div>
+  <ul id="doneList"></ul>
+
+  <p class="note"><b>How it rings:</b> at the due time Ringdo takes over the screen, plays a looping alarm that gets louder, and vibrates until you dismiss or snooze. Keep Ringdo open (it can sit in the background with the screen locked on most Android phones). Install it to your home screen for the best results. Your todos are stored only on this device.</p>
+</div>
+
+<div class="ring" id="ring" role="alertdialog" aria-modal="true" aria-labelledby="ringWhat">
+  <div>
+    <div class="pulse"><svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="18" r="9" stroke="currentColor" stroke-width="3"/><path d="M16 13v5l3 2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M5 8l4-3M27 8l-4-3" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></div>
+    <div class="bigtime" id="ringTime">--:--</div>
+    <div class="what" id="ringWhat">Task</div>
+    <div class="sub" id="ringSub">Due now</div>
+  </div>
+  <div class="acts">
+    <div class="sub" style="margin-bottom:-2px">Snooze</div><div class="snz">
+      <button class="btn" data-snooze="5">5 min</button>
+      <button class="btn" data-snooze="10">10 min</button>
+      <button class="btn" data-snooze="30">30 min</button>
+    </div>
+    <button class="btn primary" id="doneBtn">Mark done &amp; stop</button>
+    <button class="btn ghost" id="stopBtn">Stop alarm only</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const KEY = 'ringdo.todos.v1';
+let store; try { store = window.localStorage; store.getItem('x'); } catch { store = null; }
+const mem = {};
+const load = () => { try { return JSON.parse((store ? store.getItem(KEY) : mem[KEY]) || '[]'); } catch { return []; } };
+const save = () => { const s = JSON.stringify(todos); store ? store.setItem(KEY, s) : (mem[KEY] = s); };
+let todos = load();
+const uid = () => Math.random().toString(36).slice(2, 10);
+const pad = n => String(n).padStart(2, '0');
+const fmtTime = d => d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+const fmtDay = d => {
+  const t = new Date(); t.setHours(0,0,0,0);
+  const x = new Date(d); x.setHours(0,0,0,0);
+  const diff = Math.round((x - t) / 864e5);
+  if (diff === 0) return 'Today'; if (diff === 1) return 'Tomorrow'; if (diff === -1) return 'Yesterday';
+  return d.toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'});
+};
+const countdown = ms => {
+  const neg = ms < 0; ms = Math.abs(ms);
+  const m = Math.floor(ms / 6e4), h = Math.floor(m / 60), dd = Math.floor(h / 24);
+  let s = dd ? `${dd}d ${h%24}h` : h ? `${h}h ${m%60}m` : m ? `${m}m` : `${Math.floor(ms/1000)}s`;
+  return neg ? `${s} late` : `in ${s}`;
+};
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('show'),2200); }
+
+/* ---------- Audio engine ---------- */
+let ctx = null, master = null, keepAlive = null, loopTimer = null, ringStart = 0;
+function ensureAudio(){
+  if (!ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return false;
+    ctx = new AC(); master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+  }
+  if (ctx.state === 'suspended') ctx.resume();
+  return true;
+}
+function startKeepAlive(){
+  // near-silent tone keeps the audio session (and the tab) alive in the background on many phones
+  if (!ctx || keepAlive) return;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = 40; g.gain.value = 0.0008; o.connect(g); g.connect(ctx.destination); o.start();
+  keepAlive = o;
+}
+function tone(t, f, dur, type='square', vol=1, f2=null){
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  if (f2) o.frequency.linearRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.01);
+  g.gain.setValueAtTime(vol, t + dur - 0.02); g.gain.linearRampToValueAtTime(0, t + dur);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
+}
+const patterns = {
+  classic(t){ for (let i=0;i<4;i++) tone(t + i*0.14, 2000, 0.09, 'square', .5); },
+  siren(t){ tone(t, 650, 0.5, 'sawtooth', .45, 1500); tone(t+0.5, 1500, 0.5, 'sawtooth', .45, 650); },
+  chime(t){ [880,1109,1319].forEach((f,i)=>tone(t + i*0.18, f, 0.35, 'triangle', .8)); }
+};
+function startSound(kind){
+  if (!ensureAudio()) return;
+  stopSound(true);
+  ringStart = ctx.currentTime;
+  master.gain.cancelScheduledValues(ctx.currentTime);
+  master.gain.setValueAtTime(0.35, ctx.currentTime);
+  master.gain.linearRampToValueAtTime(1, ctx.currentTime + 25); // gets louder over 25s
+  const play = patterns[kind] || patterns.classic;
+  play(ctx.currentTime + 0.05);
+  loopTimer = setInterval(() => play(ctx.currentTime + 0.05), 1000);
+}
+function stopSound(quiet){
+  clearInterval(loopTimer); loopTimer = null;
+  if (ctx && master){ master.gain.cancelScheduledValues(ctx.currentTime); master.gain.setValueAtTime(0, ctx.currentTime); }
+}
+
+/* ---------- Vibration ---------- */
+let vibTimer = null;
+const canVib = 'vibrate' in navigator;
+function startVib(){ if(!canVib) return; const v=()=>navigator.vibrate([900,300,900,300]); v(); vibTimer=setInterval(v,2400); }
+function stopVib(){ clearInterval(vibTimer); vibTimer=null; if(canVib) navigator.vibrate(0); }
+
+/* ---------- Wake lock ---------- */
+let wakeLock = null;
+async function getWake(){
+  try { if ('wakeLock' in navigator){ wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release',()=>{wakeLock=null;renderArm();}); } } catch {}
+  renderArm();
+}
+
+/* ---------- Notifications / SW ---------- */
+let swReg = null;
+async function setupSW(){
+  if (!('serviceWorker' in navigator)) return;
+  try { swReg = await navigator.serviceWorker.register('sw.js'); } catch {}
+  navigator.serviceWorker.addEventListener?.('message', e => { if (e.data?.type==='ring' && e.data.id){ const t=todos.find(x=>x.id===e.data.id); if(t && !ringing) ring(t); } });
+}
+async function notify(t){
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const opts = { body: `Due ${fmtTime(new Date(t.due))} — tap to open the alarm`, tag: 'ringdo-'+t.id, renotify: true,
+    requireInteraction: true, vibrate: [900,300,900,300,900], icon: 'icon.svg', badge: 'icon.svg', data: {id:t.id} };
+  try { if (swReg) await swReg.showNotification('⏰ ' + t.title, opts); else new Notification('⏰ ' + t.title, opts); } catch {}
+}
+
+let armed = false;
+async function arm(){
+  ensureAudio(); startKeepAlive();
+  // short confirmation chirp proves sound is unlocked
+  if (ctx){ master.gain.setValueAtTime(0.5, ctx.currentTime); patterns.chime(ctx.currentTime+0.02); master.gain.setValueAtTime(0, ctx.currentTime+0.9); }
+  if (canVib) navigator.vibrate(120);
+  if ('Notification' in window && Notification.permission === 'default'){ try { await Notification.requestPermission(); } catch {} }
+  await getWake();
+  armed = true; renderArm(); toast('Alarms armed');
+}
+function renderArm(){
+  const s = !!(ctx && ctx.state === 'running');
+  const set = (id, on, bad) => { const el=$(id); el.classList.toggle('on', !!on); el.classList.toggle('bad', !on && !!bad); };
+  set('#cSound', s, true);
+  set('#cVib', canVib && armed, !canVib);
+  const np = ('Notification' in window) ? Notification.permission : 'unsupported';
+  set('#cNotif', np==='granted', np==='denied'||np==='unsupported');
+  set('#cWake', !!wakeLock, !('wakeLock' in navigator));
+  $('#armBox').classList.toggle('armed', s);
+  $('#armTitle').textContent = s ? 'Alarms armed' : 'Arm the alarm';
+  $('#armText').textContent = s
+    ? 'Ringdo will ring loudly at each todo’s time. Leave this app open or in the background — don’t swipe it away.'
+    : 'Phones block loud sound until you tap once. Arm Ringdo to unlock the alarm sound, vibration, screen wake and backup notifications.';
+  $('#armBtn').textContent = s ? 'Re-arm' : 'Arm alarms';
+}
+
+/* ---------- Ringing ---------- */
+let ringing = null, titleTimer = null;
+function ring(t){
+  ringing = t;
+  const d = new Date(t.due);
+  $('#ringTime').textContent = fmtTime(d);
+  $('#ringWhat').textContent = t.title;
+  $('#ringSub').textContent = t.snoozes ? `Snoozed ${t.snoozes}×` : 'Due now';
+  $('#ring').classList.add('show');
+  startSound(t.sound); startVib();
+  if (document.hidden) notify(t);
+  let flip=false; clearInterval(titleTimer);
+  titleTimer = setInterval(()=>{ document.title = (flip=!flip) ? '⏰ ' + t.title : 'Ringdo — ringing'; }, 800);
+  // auto-stop after 10 minutes so it never rings forever
+  clearTimeout(ring._cap); ring._cap = setTimeout(()=>{ if(ringing===t) snooze(10); }, 10*60*1000);
+}
+function stopRing(){
+  stopSound(); stopVib(); clearInterval(titleTimer); document.title = 'Ringdo — Todos that ring';
+  $('#ring').classList.remove('show');
+  if (ringing && swReg?.getNotifications) swReg.getNotifications({tag:'ringdo-'+ringing.id}).then(ns=>ns.forEach(n=>n.close())).catch(()=>{});
+  ringing = null;
+}
+function nextRepeat(t){
+  const d = new Date(t.due);
+  do { d.setDate(d.getDate()+1); } while (t.repeat==='weekdays' && (d.getDay()===0 || d.getDay()===6));
+  while (d < new Date()) d.setDate(d.getDate()+1);
+  return d.getTime();
+}
+function finish(t, markDone){
+  if (t.repeat && t.repeat !== 'none'){ t.due = nextRepeat(t); t.fired = false; t.snoozes = 0; if(markDone) toast('Done — next ring ' + fmtDay(new Date(t.due)) + ' ' + fmtTime(new Date(t.due))); }
+  else { t.fired = true; if (markDone) t.done = true; }
+  save(); render();
+}
+function snooze(min){
+  const t = ringing; if(!t) return;
+  t.due = Date.now() + min*60000; t.fired = false; t.snoozes = (t.snoozes||0)+1;
+  save(); stopRing(); render(); toast(`Snoozed ${min} min`);
+}
+$('#doneBtn').onclick = () => { const t=ringing; stopRing(); if(t) finish(t, true); };
+$('#stopBtn').onclick = () => { const t=ringing; stopRing(); if(t) finish(t, false); };
+document.querySelectorAll('[data-snooze]').forEach(b => b.onclick = () => snooze(+b.dataset.snooze));
+
+/* ---------- Scheduler ---------- */
+function tick(){
+  const now = new Date();
+  $('#clock').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  if (!ringing){
+    const due = todos.filter(t => !t.done && !t.fired && t.due <= now.getTime()).sort((a,b)=>a.due-b.due)[0];
+    if (due) ring(due);
+  }
+  updateCountdowns();
+}
+setInterval(tick, 1000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden){ tick(); if(armed && !wakeLock) getWake(); if(ctx && ctx.state==='suspended') ctx.resume().then(renderArm); } });
+
+/* ---------- UI ---------- */
+function setDT(d){ $('#date').value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; $('#time').value = `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+(function initDT(){ const d=new Date(Date.now()+15*60000); d.setSeconds(0,0); setDT(d); })();
+$('#quick').addEventListener('click', e => {
+  const q = e.target.dataset?.q; if(!q) return;
+  const d = new Date(); d.setSeconds(0,0);
+  if (q==='1m') d.setMinutes(d.getMinutes()+1);
+  if (q==='15m') d.setMinutes(d.getMinutes()+15);
+  if (q==='1h') d.setHours(d.getHours()+1);
+  if (q==='tonight'){ d.setHours(21,0); if (d < new Date()) d.setDate(d.getDate()+1); }
+  if (q==='tmr'){ d.setDate(d.getDate()+1); d.setHours(7,0); }
+  setDT(d);
+});
+$('#addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  ensureAudio(); startKeepAlive(); renderArm(); // the tap also unlocks sound
+  const title = $('#title').value.trim(); if(!title) return;
+  const [y,m,d] = $('#date').value.split('-').map(Number); const [hh,mm] = $('#time').value.split(':').map(Number);
+  const due = new Date(y, m-1, d, hh, mm, 0, 0).getTime();
+  if (due < Date.now() - 30000){ toast('That time has already passed'); return; }
+  todos.push({ id: uid(), title, due, sound: $('#sound').value, repeat: $('#repeat').value, done:false, fired:false, snoozes:0, created: Date.now() });
+  save(); render(); $('#title').value=''; toast('Alarm set for ' + fmtDay(new Date(due)) + ' ' + fmtTime(new Date(due)));
+});
+const ICON_CHECK = '<svg viewBox="0 0 16 16" fill="none"><path d="M3.5 8.5l3 3 6-7" stroke="#14110f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_DEL = '<svg viewBox="0 0 20 20" width="18" height="18" fill="none"><path d="M5 6h10M8 6V4.5h4V6M6.5 6l.6 9.5h5.8l.6-9.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const esc = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const repLabel = {daily:'↻ daily', weekdays:'↻ weekdays'};
+function item(t){
+  const d = new Date(t.due), late = !t.done && t.due < Date.now();
+  return `<li class="todo ${t.done?'done':''} ${late?'overdue':''}" data-id="${t.id}">
+    <button class="check" data-act="toggle" aria-label="${t.done?'Mark not done':'Mark done'}">${ICON_CHECK}</button>
+    <div><div class="t">${esc(t.title)}</div>
+      <div class="meta"><span>${fmtDay(d)} · ${fmtTime(d)}</span>${t.done?'':`<span class="cd" data-due="${t.due}">${countdown(t.due-Date.now())}</span>`}${repLabel[t.repeat]?`<span>${repLabel[t.repeat]}</span>`:''}</div></div>
+    <button class="del" data-act="del" aria-label="Delete">${ICON_DEL}</button></li>`;
+}
+function render(){
+  const up = todos.filter(t=>!t.done).sort((a,b)=>a.due-b.due);
+  const dn = todos.filter(t=>t.done).sort((a,b)=>b.due-a.due).slice(0,20);
+  $('#upList').innerHTML = up.length ? up.map(item).join('') : '<div class="empty">No alarms set. Add a todo above — it will ring, not just ping.</div>';
+  $('#doneList').innerHTML = dn.map(item).join('');
+  $('#doneSec').style.display = dn.length ? '' : 'none';
+  $('#upCount').textContent = up.length ? `${up.length} ringing soon` : '';
+  $('#doneCount').textContent = dn.length ? `${dn.length}` : '';
+}
+function updateCountdowns(){ document.querySelectorAll('.cd[data-due]').forEach(el => { const ms=+el.dataset.due-Date.now(); el.textContent = countdown(ms); el.closest('li').classList.toggle('overdue', ms<0); }); }
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if(!b) return;
+  const id = b.closest('li').dataset.id, t = todos.find(x=>x.id===id); if(!t) return;
+  if (b.dataset.act==='del'){ todos = todos.filter(x=>x.id!==id); }
+  if (b.dataset.act==='toggle'){ t.done = !t.done; if(!t.done && t.due < Date.now()){ t.fired = true; } }
+  save(); render();
+});
+$('#armBtn').onclick = arm;
+$('#testBtn').onclick = () => { ensureAudio(); startKeepAlive(); renderArm(); ring({id:'test', title:'Test alarm — this is how it rings', due: Date.now(), sound: $('#sound').value, repeat:'none'}); };
+// test ring shouldn't modify storage
+const _finish = finish; finish = (t, m) => { if (t.id==='test') return; _finish(t, m); };
+const _snooze = snooze; snooze = (min) => { if (ringing?.id==='test'){ stopRing(); toast('Test snoozed'); return; } _snooze(min); };
+
+// on reload, alarms already in the past while closed still ring once (so nothing is silently missed)
+setupSW(); render(); renderArm(); tick();
+if (location.hash.startsWith('#ring=')) history.replaceState(null,'',location.pathname);
+})();
+</script>
+</body>
+</html>
