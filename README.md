@@ -89,7 +89,7 @@ passport renewal 5/11 at 10am                     → dd/mm
 
 ## Install
 
-Download the APK from the [latest release](../../releases/latest), open it on your Android phone and allow installs from that source when asked.
+Download [`releases/Ringdo-1.1.apk`](releases/Ringdo-1.1.apk) (open it, then tap **Download raw file**), open it on your Android phone and allow installs from that source when asked. Release notes are under [Releases](../../releases).
 
 On first launch, tap **Allow** on each item in the setup card: notifications, full-screen alarm, exact alarms and unrestricted battery. Then tap **Test** and lock your phone. It rings in 10 seconds.
 
@@ -131,6 +131,7 @@ android/                     Native Android app (Kotlin + Jetpack Compose)
     Editor.kt                Add/edit screen: repeats, nag, checklist, sound
     Ui.kt                    Theme and shared components
   app/src/test/              Unit tests (recurrence and parser) and screenshot tests
+releases/                    Signed APKs
 web/                         Original PWA prototype (rings only while the tab is open)
 docs/                        Logo and screenshots
 ```
